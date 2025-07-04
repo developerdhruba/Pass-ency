@@ -1,3 +1,7 @@
+import { auth, db } from './script.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 function simpleDecrypt(encrypted) {
   try {
     return decodeURIComponent(escape(atob(encrypted)));
@@ -6,17 +10,29 @@ function simpleDecrypt(encrypted) {
   }
 }
 
-window.onload = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const encrypted = urlParams.get('enc');
-  if (encrypted) {
-    document.getElementById("encInput").value = encrypted;
-    document.getElementById("output").innerText = "Original Password: " + simpleDecrypt(encrypted);
-  }
-};
-
 window.decrypt = () => {
   const input = document.getElementById("encInput").value;
-  const result = simpleDecrypt(input);
-  document.getElementById("output").innerText = "Original Password: " + result;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const vaultRef = collection(db, "users", user.uid, "vault");
+      const snapshot = await getDocs(vaultRef);
+
+      let found = false;
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.encrypted === input) {
+          const result = simpleDecrypt(input);
+          document.getElementById("output").innerText = "Original Password: " + result;
+          found = true;
+        }
+      });
+
+      if (!found) {
+        document.getElementById("output").innerText = "Encrypted password not found in your account.";
+      }
+    } else {
+      alert("Please sign in.");
+    }
+  });
 };
