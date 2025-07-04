@@ -17,7 +17,13 @@ window.encryptAndSave = () => {
         encrypted,
         timestamp: Date.now()
       });
+
       document.getElementById("output").innerText = "Encrypted Password: " + encrypted;
+
+      // Show the decrypt button and pass encrypted as URL param
+      const link = document.getElementById("decryptLink");
+      link.href = `decrypt.html?enc=${encodeURIComponent(encrypted)}`;
+      link.style.display = "inline-block";
     } else {
       alert("User not signed in.");
     }
