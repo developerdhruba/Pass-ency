@@ -6,6 +6,15 @@ function simpleDecrypt(encrypted) {
   }
 }
 
+window.onload = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const encrypted = urlParams.get('enc');
+  if (encrypted) {
+    document.getElementById("encInput").value = encrypted;
+    document.getElementById("output").innerText = "Original Password: " + simpleDecrypt(encrypted);
+  }
+};
+
 window.decrypt = () => {
   const input = document.getElementById("encInput").value;
   const result = simpleDecrypt(input);
